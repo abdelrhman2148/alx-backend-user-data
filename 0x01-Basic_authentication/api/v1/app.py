@@ -1,47 +1,67 @@
+#!/usr/bin/env python3
+"""Route module"""
 from os import getenv
-from flask import Flask, jsonify, request, abort
-from flask_cors import CORS
-from api.v1.auth.auth import Auth
 from api.v1.views import app_views
-from api.v1.auth.basic_auth import BasicAuth
+from flask import Flask, jsonify
+from flask import Flask, abort
+from flask import Flask, request
+from flask_cors import (CORS, cross_origin)
+import os
 
-# Check for basic_auth in the environment variable
-if getenv("AUTH_TYPE") == "basic_auth":
-    auth = BasicAuth()
-else:
-    auth = Auth()
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
+auth = None
+AUTH_TYPE = os.getenv("AUTH_TYPE")
+if AUTH_TYPE == "auth":
+    from api.v1.auth.auth import Auth
+    auth = Auth()
+elif AUTH_TYPE == "basic_auth":
+    from api.v1.auth.basic_auth import BasicAuth
+    auth = BasicAuth()
+
 
 @app.before_request
-def before_request():
-    """Filter requests before handling."""
+def bef_req():
+    """
+    Filter each request before it's handled by the proper route
+    """
     if auth is None:
-        return
-    excluded_paths = ['/api/v1/status/', '/api/v1/unauthorized/', '/api/v1/forbidden/']
-    if not auth.require_auth(request.path, excluded_paths):
-        return
-    if auth.authorization_header(request) is None:
-        abort(401)
-    if auth.current_user(request) is None:
-        abort(403)
+        pass
+    else:
+        excluded = [
+            '/api/v1/status/',
+            '/api/v1/unauthorized/',
+            '/api/v1/forbidden/'
+        ]
+        if auth.require_auth(request.path, excluded):
+            if auth.authorization_header(request) is None:
+                abort(401, description="Unauthorized")
+            if auth.current_user(request) is None:
+                abort(403, description="Forbidden")
 
-@app.errorhandler(401)
-def unauthorized(error):
-    """Handle unauthorized errors."""
-    return jsonify({"error": "Unauthorized"}), 401
-
-@app.errorhandler(403)
-def forbidden(error):
-    """Handle forbidden errors."""
-    return jsonify({"error": "Forbidden"}), 403
 
 @app.errorhandler(404)
-def not_found(error):
-    """Handle not found errors."""
+def not_found(error) -> str:
+    """ Not found handler
+    """
     return jsonify({"error": "Not found"}), 404
+
+
+@app.errorhandler(401)
+def unauthorized(error) -> str:
+    """ Request unauthorized handler
+    """
+    return jsonify({"error": "Unauthorized"}), 401
+
+
+@app.errorhandler(403)
+def forbidden(error) -> str:
+    """ Request unauthorized handler
+    """
+    return jsonify({"error": "Forbidden"}), 403
+
 
 if __name__ == "__main__":
     host = getenv("API_HOST", "0.0.0.0")
