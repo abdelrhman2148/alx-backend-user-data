@@ -2,18 +2,19 @@ from os import getenv
 from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
 from api.v1.auth.auth import Auth
+from api.v1.auth.basic_auth import BasicAuth  # Make sure to import BasicAuth
 from api.v1.views import app_views
 
-from api.v1.auth.basic_auth import BasicAuth
-
-if os.getenv('AUTH_TYPE') == 'basic_auth':
+# Initialize the correct authentication class based on the environment variable
+auth = None
+if getenv('AUTH_TYPE') == 'basic_auth':
     auth = BasicAuth()
+else:
+    auth = Auth()  # Default to Auth class if no specific type is set
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
-
-auth = Auth()
 
 @app.before_request
 def before_request():
