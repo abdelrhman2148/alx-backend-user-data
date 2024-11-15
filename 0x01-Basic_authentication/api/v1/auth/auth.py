@@ -1,4 +1,4 @@
-from typing import List, TypeVar  # Import both List and TypeVar
+from typing import List
 
 class Auth:
     """Auth class to manage API authentication."""
@@ -7,28 +7,16 @@ class Auth:
         """Check if a path is in the excluded paths."""
         if path is None or excluded_paths is None or len(excluded_paths) == 0:
             return True
-
-        # Normalize the path to ensure consistency
         if path[-1] != '/':
             path += '/'
+        return path not in [ep[:-1] if ep.endswith('/') else ep for ep in excluded_paths]
 
-        # Check if path matches any in excluded_paths
-        for excluded_path in excluded_paths:
-            if excluded_path.endswith('/') and excluded_path[:-1] == path[:-1]:
-                return False
-            if excluded_path == path:
-                return False
+    def authorization_header(self, request=None) -> str:
+        """Retrieve the Authorization header."""
+        if request is None:
+            return None
+        return request.headers.get('Authorization')
 
-        return True
-
-
-def authorization_header(self, request=None) -> str:
-    """Retrieve the Authorization header."""
-    if request is None or 'Authorization' not in request.headers:
-        return None
-    return request.headers['Authorization']
-
-
-    def current_user(self, request=None) -> TypeVar('User'):
+    def current_user(self, request=None):
         """Retrieve the current user."""
         return None
