@@ -1,4 +1,4 @@
-from typing import List  # Add this import
+from typing import List, TypeVar  # Import both List and TypeVar
 
 class Auth:
     """Auth class to manage API authentication."""
