@@ -1,12 +1,8 @@
-#!/usr/bin/env python3
-"""
-Route module for the API
-"""
 from os import getenv
-from api.v1.views import app_views
-from flask import Flask, jsonify, abort, request
+from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
 from api.v1.auth.auth import Auth
+from api.v1.views import app_views
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
@@ -38,7 +34,7 @@ def forbidden(error):
     return jsonify({"error": "Forbidden"}), 403
 
 @app.errorhandler(404)
-def not_found(error) -> str:
+def not_found(error):
     """Not found handler."""
     return jsonify({"error": "Not found"}), 404
 
