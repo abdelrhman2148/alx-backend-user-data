@@ -167,16 +167,12 @@ Implement the `Auth.create_session` method to:
   python3 -m unittest discover -s tests
   ```
 
----
-
 ## Resources
 - [Flask Documentation](https://flask.palletsprojects.com/)
 - [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
 - [bcrypt Python Module](https://pypi.org/project/bcrypt/)
 - [HTTP Status Codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)
 
----
 
 ## Author
 **Abdelrhman Fikri**
-```
